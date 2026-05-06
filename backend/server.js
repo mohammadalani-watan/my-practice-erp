@@ -6,7 +6,7 @@ const app = express();
 // The VIP Guest List for your API
 const allowedOrigins = [
     'http://localhost:5173', // Keep localhost so you can still test on your computer
-    'https://my-practice-erp.vercel.app/' // REPLACE THIS with your actual Vercel URL
+    'https://my-practice-erp.vercel.app' // REPLACE THIS with your actual Vercel URL
 ];
 
 app.use(cors({

@@ -9,7 +9,7 @@ function App() {
 
   // Vite automatically knows when it is in 'production' vs 'development'
   const API_URL = import.meta.env.PROD
-    ? 'https://my-practice-erp.onrender.com' // REPLACE with your Render URL
+    ? 'https://my-practice-erp.onrender.com/api/products' // Your REAL Render URL
     : 'http://localhost:3000/api/products';
 
   // Fetch initial data (GET request)
