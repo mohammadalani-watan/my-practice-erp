@@ -7,9 +7,14 @@ function App() {
   const [newProductName, setNewProductName] = useState('');
   const [newProductPrice, setNewProductPrice] = useState('');
 
+  // Vite automatically knows when it is in 'production' vs 'development'
+  const API_URL = import.meta.env.PROD
+    ? 'https://my-practice-erp.onrender.com' // REPLACE with your Render URL
+    : 'http://localhost:3000/api/products';
+
   // Fetch initial data (GET request)
   useEffect(() => {
-    fetch('http://localhost:3000/api/products')
+    fetch(API_URL)
       .then((response) => response.json())
       .then((data) => setProducts(data))
       .catch((error) => console.error("Error:", error));
@@ -25,7 +30,7 @@ function App() {
       stock: 10 // Hardcoding stock to 10 for simplicity right now
     };
 
-    fetch('http://localhost:3000/api/products', {
+    fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newProduct) // Turn our JavaScript object into JSON text
