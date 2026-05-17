@@ -7,17 +7,26 @@ function App() {
   const [newProductName, setNewProductName] = useState('');
   const [newProductPrice, setNewProductPrice] = useState('');
 
+  const [customers, setCustomers] = useState([]);
+  const [newCustomerName, setNewCustomerName] = useState('');
+  const [newCustomerEmail, setNewCustomerEmail] = useState('');
+
   // Vite automatically knows when it is in 'production' vs 'development'
-  const API_URL = import.meta.env.PROD
-    ? 'https://my-practice-erp.onrender.com/api/products' // Your REAL Render URL
-    : 'http://localhost:3000/api/products';
+  const BASE_URL = import.meta.env.PROD
+    ? 'https://my-practice-erp.onrender.com/api' // Replace with your actual Render URL
+    : 'http://localhost:3000/api';
 
   // Fetch initial data (GET request)
   useEffect(() => {
-    fetch(API_URL)
-      .then((response) => response.json())
-      .then((data) => setProducts(data))
-      .catch((error) => console.error("Error:", error));
+    // Fetch Products
+    fetch(`${BASE_URL}/products`)
+      .then(res => res.json())
+      .then(data => setProducts(data));
+
+    // Fetch Customers
+    fetch(`${BASE_URL}/customers`)
+      .then(res => res.json())
+      .then(data => setCustomers(data));
   }, []);
 
   // Function to handle adding a new product (POST request)
@@ -30,7 +39,7 @@ function App() {
       stock: 10 // Hardcoding stock to 10 for simplicity right now
     };
 
-    fetch(API_URL, {
+    fetch(`${BASE_URL}/products`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newProduct) // Turn our JavaScript object into JSON text
@@ -48,7 +57,7 @@ function App() {
 
   const handleDeleteProduct = (id) => {
     // 1. Tell the backend to delete it
-    fetch(`${API_URL}/${id}`, {
+    fetch(`${BASE_URL}/products/${id}`, {
       method: 'DELETE',
     })
       .then(() => {
@@ -56,6 +65,28 @@ function App() {
         setProducts(products.filter(product => product.id !== id));
       })
       .catch((error) => console.error("Error deleting:", error));
+  };
+
+  const handleAddCustomer = (e) => {
+    e.preventDefault();
+    const newCustomer = { name: newCustomerName, email: newCustomerEmail };
+
+    fetch(`${BASE_URL}/customers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newCustomer)
+    })
+      .then(res => res.json())
+      .then(data => {
+        setCustomers([...customers, data]);
+        setNewCustomerName('');
+        setNewCustomerEmail('');
+      });
+  };
+
+  const handleDeleteCustomer = (id) => {
+    fetch(`${BASE_URL}/customers/${id}`, { method: 'DELETE' })
+      .then(() => setCustomers(customers.filter(c => c.id !== id)));
   };
 
   return (
@@ -68,7 +99,36 @@ function App() {
       <main className="modules-grid">
         <section className="module-card">
           <h2>👥 Customers (CRM)</h2>
-          <p>Customer data will go here.</p>
+          <form onSubmit={handleAddCustomer} style={{ marginBottom: '20px' }}>
+            <input
+              type="text"
+              placeholder="Customer Name"
+              value={newCustomerName}
+              onChange={(e) => setNewCustomerName(e.target.value)}
+              required
+            />
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={newCustomerEmail}
+              onChange={(e) => setNewCustomerEmail(e.target.value)}
+              required
+            />
+            <button type="submit">Add Customer</button>
+          </form>
+
+          {customers.length === 0 ? (
+            <p>No customers yet!</p>
+          ) : (
+            <ul>
+              {customers.map((customer) => (
+                <li key={customer.id}>
+                  <span>{customer.name} ({customer.email})</span>
+                  <button className="delete-btn" onClick={() => handleDeleteCustomer(customer.id)}>Delete</button>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="module-card">
