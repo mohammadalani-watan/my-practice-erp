@@ -60,6 +60,17 @@ app.post('/api/products', (req, res) => {
     );
 });
 
+// 3.7 Create an API Endpoint to DELETE a product
+// The ":id" part is a URL variable. If we request /api/products/5, req.params.id will be 5.
+app.delete('/api/products/:id', (req, res) => {
+    const { id } = req.params;
+
+    db.run(`DELETE FROM products WHERE id = ?`, id, function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Deleted successfully" });
+    });
+});
+
 // 4. Start the server
 app.listen(3000, () => {
     console.log('Backend server is running on http://localhost:3000');

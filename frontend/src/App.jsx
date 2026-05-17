@@ -46,6 +46,18 @@ function App() {
       .catch((error) => console.error("Error saving:", error));
   };
 
+  const handleDeleteProduct = (id) => {
+    // 1. Tell the backend to delete it
+    fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+    })
+      .then(() => {
+        // 2. Remove it from our React screen without refreshing the page
+        setProducts(products.filter(product => product.id !== id));
+      })
+      .catch((error) => console.error("Error deleting:", error));
+  };
+
   return (
     <div className="erp-container">
       <header>
@@ -87,7 +99,8 @@ function App() {
             <ul>
               {products.map((product) => (
                 <li key={product.id}>
-                  {product.name} - ${product.price} (Stock: {product.stock})
+                  <span>{product.name} - ${product.price} (Stock: {product.stock})</span>
+                  <button className="delete-btn" onClick={() => handleDeleteProduct(product.id)}>Delete</button>
                 </li>
               ))}
             </ul>
