@@ -1,75 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
+// Set the base URL dynamically: Render for production, localhost for development
+const BASE_URL = import.meta.env.PROD
+  ? 'https://my-practice-erp.onrender.com/api'
+  : 'http://localhost:3000/api';
+
 function App() {
+  // ==========================================
+  // --- STATE VARIABLES ---
+  // ==========================================
+
+  // Products State
   const [products, setProducts] = useState([]);
-  // State to hold the values typed into our form
   const [newProductName, setNewProductName] = useState('');
   const [newProductPrice, setNewProductPrice] = useState('');
 
+  // Customers State
   const [customers, setCustomers] = useState([]);
   const [newCustomerName, setNewCustomerName] = useState('');
   const [newCustomerEmail, setNewCustomerEmail] = useState('');
 
-  // Vite automatically knows when it is in 'production' vs 'development'
-  const BASE_URL = import.meta.env.PROD
-    ? 'https://my-practice-erp.onrender.com/api' // Replace with your actual Render URL
-    : 'http://localhost:3000/api';
-
-  // Fetch initial data (GET request)
+  // ==========================================
+  // --- INITIAL DATA FETCH (ON PAGE LOAD) ---
+  // ==========================================
   useEffect(() => {
     // Fetch Products
     fetch(`${BASE_URL}/products`)
-      .then(res => res.json())
-      .then(data => setProducts(data));
+      .then((response) => response.json())
+      .then((data) => setProducts(data))
+      .catch((error) => console.error("Error fetching products:", error));
 
     // Fetch Customers
     fetch(`${BASE_URL}/customers`)
-      .then(res => res.json())
-      .then(data => setCustomers(data));
+      .then((response) => response.json())
+      .then((data) => setCustomers(data))
+      .catch((error) => console.error("Error fetching customers:", error));
   }, []);
 
-  // Function to handle adding a new product (POST request)
+  // ==========================================
+  // --- PRODUCT HANDLERS ---
+  // ==========================================
   const handleAddProduct = (e) => {
-    e.preventDefault(); // Prevents the page from refreshing when you click submit
+    e.preventDefault();
 
     const newProduct = {
       name: newProductName,
       price: parseFloat(newProductPrice),
-      stock: 10 // Hardcoding stock to 10 for simplicity right now
+      stock: 10 // Hardcoded for practice
     };
 
     fetch(`${BASE_URL}/products`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newProduct) // Turn our JavaScript object into JSON text
+      body: JSON.stringify(newProduct)
     })
       .then((response) => response.json())
       .then((data) => {
-        // Add the new product to our existing list on the screen
         setProducts([...products, data]);
-        // Clear the form fields
         setNewProductName('');
         setNewProductPrice('');
       })
-      .catch((error) => console.error("Error saving:", error));
+      .catch((error) => console.error("Error saving product:", error));
   };
 
   const handleDeleteProduct = (id) => {
-    // 1. Tell the backend to delete it
     fetch(`${BASE_URL}/products/${id}`, {
       method: 'DELETE',
     })
       .then(() => {
-        // 2. Remove it from our React screen without refreshing the page
         setProducts(products.filter(product => product.id !== id));
       })
-      .catch((error) => console.error("Error deleting:", error));
+      .catch((error) => console.error("Error deleting product:", error));
   };
 
+  // ==========================================
+  // --- CUSTOMER HANDLERS ---
+  // ==========================================
   const handleAddCustomer = (e) => {
     e.preventDefault();
-    const newCustomer = { name: newCustomerName, email: newCustomerEmail };
+
+    const newCustomer = {
+      name: newCustomerName,
+      email: newCustomerEmail
+    };
 
     fetch(`${BASE_URL}/customers`, {
       method: 'POST',
@@ -81,14 +95,23 @@ function App() {
         setCustomers([...customers, data]);
         setNewCustomerName('');
         setNewCustomerEmail('');
-      });
+      })
+      .catch((error) => console.error("Error saving customer:", error));
   };
 
   const handleDeleteCustomer = (id) => {
-    fetch(`${BASE_URL}/customers/${id}`, { method: 'DELETE' })
-      .then(() => setCustomers(customers.filter(c => c.id !== id)));
+    fetch(`${BASE_URL}/customers/${id}`, {
+      method: 'DELETE'
+    })
+      .then(() => {
+        setCustomers(customers.filter(c => c.id !== id));
+      })
+      .catch((error) => console.error("Error deleting customer:", error));
   };
 
+  // ==========================================
+  // --- RENDER USER INTERFACE ---
+  // ==========================================
   return (
     <div className="erp-container">
       <header>
@@ -97,8 +120,11 @@ function App() {
       </header>
 
       <main className="modules-grid">
+
+        {/* MODULE 1: CRM (Customers) */}
         <section className="module-card">
           <h2>👥 Customers (CRM)</h2>
+
           <form onSubmit={handleAddCustomer} style={{ marginBottom: '20px' }}>
             <input
               type="text"
@@ -131,10 +157,10 @@ function App() {
           )}
         </section>
 
+        {/* MODULE 2: Inventory (Products) */}
         <section className="module-card">
           <h2>📦 Products (Inventory)</h2>
 
-          {/* The new form to add products */}
           <form onSubmit={handleAddProduct} style={{ marginBottom: '20px' }}>
             <input
               type="text"
@@ -167,10 +193,12 @@ function App() {
           )}
         </section>
 
+        {/* MODULE 3: Orders (Sales) - Ready for your next challenge! */}
         <section className="module-card">
           <h2>🛒 Orders (Sales)</h2>
           <p>Sales data will go here.</p>
         </section>
+
       </main>
     </div>
   );
